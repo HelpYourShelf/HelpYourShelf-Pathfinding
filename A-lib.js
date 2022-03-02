@@ -71,6 +71,8 @@ class Pathfinder{ /**
         this.y = y;
         this.destinationX = destinationX;
         this.destinationY = destinationY;
+        this.gscore = 0;
+        this.possibleMove = [];
         console.log("Moving the block number " + this.matrix.getmatrix[this.y][this.x] + " to block number " + this.matrix.getmatrix[this.destinationY][this.destinationX]);
         console.log("Distance between current position and the objective is about " + this.hscore.toFixed(2) + " blocks");
         this.solve();
@@ -86,7 +88,7 @@ class Pathfinder{ /**
     }
 
     /**
-     * This method creates an object that contains everything that an object needs to contain
+     * This method creates an object that contains everything that a move needs
      * @param {String} moveName Name of the move, not that useful, it just makes it more readeable by humans
      * @param {Matrix} preMat State of the matrix before the move
      * @param {Matrix} postMat State of the matrix after the move
@@ -101,6 +103,8 @@ class Pathfinder{ /**
             }
     }
 
+
+    //TODO : MODIFY HSCORE SO I CAN USE IT WITH ANY MATRIX AND FROM EVERY POINT
     /**
      * This method solves the problmen that you defined by instanciating the class
      * 
@@ -112,7 +116,9 @@ class Pathfinder{ /**
                 if(this.matrix.moves.hasOwnProperty(key) && this.matrix.moves[key] == true) {
                     switch(key) {
                         case "right" :
-                        
+                            this.possibleMove.push(this.createMove(
+                                "right", this.matrix.getmatrix, this.matrix.getmatrix.setZero[this.y][this.x+1], this.gscore+this.hscore
+                            ));
                             break;
                         case "left" :
 
