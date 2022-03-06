@@ -5,16 +5,35 @@ class Matrix{
     * @param {number} columns The number of columns you want in your matrix, it (obviously) needs to be greater than 0 
     * @param {number} emptyRow The index of the row where a block will be empty, starts at 0   i.e : 1 would be row 2 etc
     * @param {number} emptyColumn The index of the column where a block will be empty, starts at 0   i.e : 1 would be column 2 etc
+    * @param {boolean} log Alows you to enable logging when creating a matrix, it's useful for debugging
     */
-    constructor(rows, columns, emptyRow, emptyColumn) {
+    constructor(rows, columns, emptyRow, emptyColumn, log = false) {
         this.rows = rows;
         this.columns = columns;
         this.emptyRow = emptyRow;
         this.emptyColumn = emptyColumn;
         this.mat = Array.from({length:this.rows},(_val1,i1)=>Array.from({length:this.columns},(_val2,i2)=>i1*this.columns+i2+1));
         this.mat[emptyRow][emptyColumn] = 0;
+        if (log) {
         console.log("Successfully create a " + this.rows + " * " + this.columns + " Matrix. The empty square is the one at " + this.zero);
         console.log(this.mat.join('\r\n'));
+        }
+    }
+
+    /**
+     * Returns the number of row in this matrix
+     * @returns {number}
+     */
+    get rowCount() {
+        return this.rows;
+    }
+
+    /**
+     * Returns the number of columns in this matrix
+     * @returns {number}
+     */
+    get columnCount() {
+        return this.columns;
     }
 
     /**
@@ -74,17 +93,18 @@ class Pathfinder{ /**
         this.gscore = 0;
         this.possibleMove = [];
         console.log("Moving the block number " + this.matrix.getmatrix[this.y][this.x] + " to block number " + this.matrix.getmatrix[this.destinationY][this.destinationX]);
-        console.log("Distance between current position and the objective is about " + this.hscore.toFixed(2) + " blocks");
+        console.log("Distance between current position and the objective is about " + this.hscore(this.y, this.x).toFixed(2) + " blocks");
         this.solve();
     }
 
     /**
-     * 
+     * @param {number} y Current row from where to calculate
+     * @param {number} x Current column form where to calculate
      * @returns {number} Distance between the 2 positions in the array
      */
-    get hscore() { 
-        return Math.sqrt(Math.pow(this.matrix.getmatrix[this.y][this.x] - (this.destinationX + 1) ,2)
-                         + Math.pow(this.matrix.getmatrix[this.y][this.x] - (this.destinationY + 1),2))
+    hscore(y,x) { 
+        return Math.sqrt(Math.pow(this.matrix.getmatrix[y][x] - (this.destinationX + 1) ,2)
+                         + Math.pow(this.matrix.getmatrix[y][x] - (this.destinationY + 1),2))
     }
 
     /**
@@ -104,7 +124,6 @@ class Pathfinder{ /**
     }
 
 
-    //TODO : MODIFY HSCORE SO I CAN USE IT WITH ANY MATRIX AND FROM EVERY POINT
     /**
      * This method solves the problmen that you defined by instanciating the class
      * 
@@ -117,26 +136,48 @@ class Pathfinder{ /**
                     switch(key) {
                         case "right" :
                             this.possibleMove.push(this.createMove(
-                                "right", this.matrix.getmatrix, this.matrix.getmatrix.setZero[this.y][this.x+1], this.gscore+this.hscore
+                                "right",
+                                this.matrix.getmatrix,
+                                new Matrix(this.matrix.rowCount, this.matrix.columnCount, this.matrix.zero[0], this.matrix.zero[1]+1).getmatrix,
+                                this.gscore+this.hscore(this.y, this.x+1).toFixed(3)
                             ));
                             break;
                         case "left" :
-
+                            this.possibleMove.push(this.createMove(
+                                "left",
+                                this.matrix.getmatrix,
+                                new Matrix(this.matrix.rowCount, this.matrix.columnCount, this.matrix.zero[0], this.matrix.zero[1]-1).getmatrix,
+                                this.gscore+this.hscore(this.y, this.x+1).toFixed(3)
+                            ));
                             break;
                         case "up" : 
-
+                        this.possibleMove.push(this.createMove(
+                            "up",
+                            this.matrix.getmatrix,
+                            new Matrix(this.matrix.rowCount, this.matrix.columnCount, this.matrix.zero[0]+1, this.matrix.zero[1]).getmatrix,
+                            this.gscore+this.hscore(this.y, this.x+1).toFixed(3)
+                        ));
                             break;
                         case "down":
-
+                            this.possibleMove.push(this.createMove(
+                                "down",
+                                this.matrix.getmatrix,
+                                new Matrix(this.matrix.rowCount, this.matrix.columnCount, this.matrix.zero[0]-1, this.matrix.zero[1]).getmatrix,
+                                this.gscore+this.hscore(this.y, this.x+1).toFixed(3)
+                            ));
                             break;
                     }
-
+                    console.log(this.possibleMove);
+                    
                 }
             }
+            this.possibleMove = [];
+            break;
         }
     }
 }
 
-let test = new Matrix(3,3,1,1);
+let test = new Matrix(3,3,1,1, true);
 console.log(test.moves);
+test.setZero(1,1);
 let oui = new Pathfinder(test, 0,0, 2, 0);
