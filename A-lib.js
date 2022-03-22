@@ -24,12 +24,14 @@ class Matrix{
      * This methods allows you to switch the empty cell position by providing the index of the new empty row and column
      * @param {number} row Index of the new empty row
      * @param {number} col Index of the new empty column
+     * @returns {Matrix} Returns the new Matrix state
      */
-    /*setEmptyPosition(row, col) { 
+    setEmptyPosition(row, col) { 
         [this.matrix[this.emptyRow][this.emptyColumn], this.matrix[row][col]] = [this.matrix[row][col], 0 ];
         this.emptyRow = row;
         this.emptyColumn = col;
-    }*/
+        return this;
+    }
 
     /**
      * This methods returns the possible positions that the empty cell can go to, it returns it as an object like so "name of the move" : boolean
@@ -46,7 +48,7 @@ class Matrix{
     /**
      * This method alows you to find the position of any box in the matrix
      * @param {number} box the id of the box you want to find
-     * @returns {Array} Contains the row and column of the box you're searching for
+     * @returns {Array} Contains the row and column of the box you're searching for like so : [0] is the row index and [1] is the column index
      */
     getBoxPos(box) {
         for(let r = 0; r < this.rows; r++) {
@@ -113,41 +115,49 @@ class Pathfinder{
     solve(){
         let gscore = 0;
         let possibleMove = [];
+        let tempMatrix = this.matrix;
         while(this.matrix.matrix[this.destinationRow][this.destinationColumn] != this.boxID) {
             gscore++;
+            possibleMove = [];
             for(let move in this.matrix.possibleMoves) {
                 if(this.matrix.possibleMoves.hasOwnProperty(move) && this.matrix.possibleMoves[move] == true) {;
                     switch(move) {
+                        default: 
+                        tempMatrix = this.matrix;                     
                         case "right" :
+                            tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn + 1);
                             possibleMove.push(this.createMove(
-                                "right",
-                                this.matrix.matrix,
-                                new Matrix(this.matrix.rows, this.matrix.columns, this.matrix.emptyRow, this.matrix.emptyColumn +1 ),
-                                gscore+this.hscore(this.currentRow, this.currentColumn-1)
+                                "RIGHT",
+                                this.matrix,
+                                tempMatrix,
+                                gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
                             ));
                             break;
                         case "left" :
+                            tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn -1);
                             possibleMove.push(this.createMove(
-                                "left",
-                                this.matrix.matrix,
-                                new Matrix(this.matrix.rows, this.matrix.columns, this.matrix.emptyRow, this.matrix.emptyColumn-1),
-                                gscore+this.hscore(this.currentRow, this.currentColumn+1)
+                                "LEFT",
+                                this.matrix,
+                                tempMatrix,
+                                gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0],tempMatrix.getBoxPos(this.boxID)[1])
                             ));
                             break;
-                        case "up" : 
+                        case "up" :
+                            tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow - 1, this.matrix.emptyColumn);
                             possibleMove.push(this.createMove(
-                            "up",
-                            this.matrix.matrix,
-                            new Matrix(this.matrix.rows, this.matrix.columns, this.matrix.emptyRow+1, this.matrix.emptyColumn),
-                            gscore+this.hscore(this.currentRow+1, this.currentColumn)
-                        ));
+                                "UP",
+                                this.matrix,
+                                tempMatrix,
+                                gscore+this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
+                            ));
                             break;
                         case "down":
+                            tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyColumn + 1, this.matrix.emptyColumn);
                             possibleMove.push(this.createMove(
-                                "down",
-                                this.matrix.matrix,
-                                new Matrix(this.matrix.rows, this.matrix.columns, this.matrix.emptyRow-1, this.matrix.emptyColumn),
-                                gscore+this.hscore(this.currentRow-1, this.currentColumn)
+                                "DOWN",
+                                this.matrix,
+                                tempMatrix, 
+                                gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
                             ));
                             break;
                     }  
@@ -155,16 +165,21 @@ class Pathfinder{
             }
             possibleMove.sort((_a, _b) => parseFloat(_a.score) - parseFloat(_b.score));
             for(let k in possibleMove) {
-                console.log(possibleMove[k].name + " has a score of " + possibleMove[k].score)
+                console.log(possibleMove[k].postMat);
             }
             this.matrix = possibleMove[0].postMat;
             this.currentRow = this.matrix.getBoxPos(this.boxID)[0];
             this.currentColumn = this.matrix.getBoxPos(this.boxID)[1];
-            //TODO : FINISH THE ALGORITHM, MAYBE IT WILL WORK SOMEDAY
-            // ISSUE WITH THE WAY I CALCULATE SCORE, MOVING BOX IS NOT ALWAYS MOVED :brain:
+            console.log("************ BEST MOVE IS " + possibleMove[0].name + " ************");
+            console.log("current matrix state : \n" + this.matrix.matrix.join('\r\n'));
+            console.log("This was move number " + gscore)
             break;
+            if (gscore >= 15) {
+                console.log("Didn't work ");
+                break;
+            }
         }
     }
 }
 
-let oui = new Pathfinder(new Matrix(3, 3, 1, 1, true), 1, 2, 0);
+let tester = new Pathfinder(new Matrix(3, 3, 1, 0, true), 1, 2, 0);
