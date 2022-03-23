@@ -1,3 +1,5 @@
+const cloneDeep = require('lodash.clonedeep')
+
 /**
 * 
 * @param {number} rows The number of rows you want in your matrix, it (obviously) needs to be greater than 0 
@@ -116,48 +118,47 @@ class Pathfinder {
     solve() {
         let gscore = 0;
         let possibleMove = [];
-        let tempMatrix = this.matrix.clone();
+        let moveHistory = [];
+        let tempMatrix = cloneDeep(this.matrix);
         while (this.matrix.matrix[this.destinationRow][this.destinationColumn] != this.boxID) {
             gscore++;
             possibleMove = [];
             for (let move in this.matrix.possibleMoves) {
-                if (this.matrix.possibleMoves.hasOwnProperty(move) && this.matrix.possibleMoves[move] == true) {
+                if (this.matrix.possibleMoves.hasOwnProperty(move) && this.matrix.possibleMoves[move]) {
                     switch (move) {
-                        default:
-                            tempMatrix = this.matrix;
                         case "right":
-                            tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn + 1);
+                            tempMatrix = cloneDeep(this.matrix);
                             possibleMove.push(this.createMove(
                                 "RIGHT",
                                 this.matrix,
-                                tempMatrix,
+                                tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn + 1),
                                 gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
                             ));
                             break;
                         case "left":
-                            tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn - 1);
+                            tempMatrix = cloneDeep(this.matrix);
                             possibleMove.push(this.createMove(
                                 "LEFT",
                                 this.matrix,
-                                tempMatrix,
+                                tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn - 1),
                                 gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
                             ));
                             break;
                         case "up":
-                            tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow - 1, this.matrix.emptyColumn);
+                            tempMatrix = cloneDeep(this.matrix);
                             possibleMove.push(this.createMove(
                                 "UP",
                                 this.matrix,
-                                tempMatrix,
+                                tempMatrix.setEmptyPosition(this.matrix.emptyRow - 1, this.matrix.emptyColumn),
                                 gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
                             ));
                             break;
                         case "down":
-                            tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyColumn + 1, this.matrix.emptyColumn);
+                            tempMatrix = cloneDeep(this.matrix);
                             possibleMove.push(this.createMove(
                                 "DOWN",
                                 this.matrix,
-                                tempMatrix,
+                                tempMatrix.setEmptyPosition(this.matrix.emptyColumn + 1, this.matrix.emptyColumn),
                                 gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
                             ));
                             break;
@@ -165,21 +166,21 @@ class Pathfinder {
                 }
             }
             possibleMove.sort((_a, _b) => parseFloat(_a.score) - parseFloat(_b.score));
-            /*for(let k in possibleMove) {
-                console.log(possibleMove[k].postMat);
-            }*/
             this.matrix = possibleMove[0].postMat;
             this.currentRow = this.matrix.getBoxPos(this.boxID)[0];
             this.currentColumn = this.matrix.getBoxPos(this.boxID)[1];
+            moveHistory.push(possibleMove[0]);
             console.log("************ BEST MOVE IS " + possibleMove[0].name + " ************");
+            console.log("It had a score of " + possibleMove[0].score);
             console.log("current matrix state : \n" + this.matrix.matrix.join('\r\n'));
-            console.log("This was move number " + gscore)
-            break;
+            console.log("This was move number " + gscore );
             if (gscore >= 15) {
                 console.log("Didn't work ");
-                break;
+                return;
             }
         }
+        console.log(moveHistory);
+        return moveHistory;
     }
 }
 
