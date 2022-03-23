@@ -145,7 +145,6 @@ class Pathfinder {
                             break;
                         case "up":
                             tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow - 1, this.matrix.emptyColumn);
-                            console.log(tempMatrix.matrix.join('\r\n'));
                             possibleMove.push(this.createMove(
                                 "UP",
                                 this.matrix,
