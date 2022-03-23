@@ -168,7 +168,6 @@ class Pathfinder {
             /*for(let k in possibleMove) {
                 console.log(possibleMove[k].postMat);
             }*/
-            console.log(" aa" + possibleMove[0].postMat.matrix.join('\r\n'));
             this.matrix = possibleMove[0].postMat;
             this.currentRow = this.matrix.getBoxPos(this.boxID)[0];
             this.currentColumn = this.matrix.getBoxPos(this.boxID)[1];
