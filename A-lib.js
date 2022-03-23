@@ -122,7 +122,6 @@ class Pathfinder {
             possibleMove = [];
             for (let move in this.matrix.possibleMoves) {
                 if (this.matrix.possibleMoves.hasOwnProperty(move) && this.matrix.possibleMoves[move] == true) {
-                    ;
                     switch (move) {
                         default:
                             tempMatrix = this.matrix;
