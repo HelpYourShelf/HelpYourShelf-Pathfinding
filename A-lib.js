@@ -15,8 +15,8 @@ class Matrix{
         this.matrix = Array.from({length:this.rows},(_val1,i1)=>Array.from({length:this.columns},(_val2,i2)=>i1*this.columns+i2+1));
         this.matrix[emptyRow][emptyColumn] = 0;
         if (log) {
-        console.log("Successfully created a " + this.rows + " * " + this.columns + " Matrix. The empty box is the one at " + this.emptyRow + " " + this.emptyColumn);
-        console.log(this.matrix.join('\r\n'));
+            console.log("Successfully created a " + this.rows + " * " + this.columns + " Matrix. The empty box is the one at " + this.emptyRow + " " + this.emptyColumn);
+            console.log(this.matrix.join('\r\n'));
         }
     }
 
@@ -38,10 +38,10 @@ class Matrix{
      * @returns {Object}
      */
     get possibleMoves() {
-        return { "right" : this.matrix[this.emptyRow][this.emptyColumn + 1] ? true: false,
-                  "left" : this.matrix[this.emptyRow][this.emptyColumn -1]  ? true : false,
-                  "up"   : this.matrix[this.emptyRow-1]                     ? true: false,
-                  "down" : this.matrix[this.emptyColumn+1]                  ? true : false,
+        return { "right" : this.matrix[this.emptyRow][this.emptyColumn + 1] ? true : false,
+                 "left"  : this.matrix[this.emptyRow][this.emptyColumn -1]  ? true : false,
+                 "up"    : this.matrix[this.emptyRow-1]                     ? true : false,
+                 "down"  : this.matrix[this.emptyColumn+1]                  ? true : false,
                 }
     }
 
@@ -110,12 +110,11 @@ class Pathfinder{
 
     /**
      * This method solves the problmen that you defined by instanciating the class
-     * 
      */
-    solve(){
+    solve() {
         let gscore = 0;
         let possibleMove = [];
-        let tempMatrix = this.matrix;
+        let tempMatrix = this.matrix.clone();
         while(this.matrix.matrix[this.destinationRow][this.destinationColumn] != this.boxID) {
             gscore++;
             possibleMove = [];
@@ -123,7 +122,7 @@ class Pathfinder{
                 if(this.matrix.possibleMoves.hasOwnProperty(move) && this.matrix.possibleMoves[move] == true) {;
                     switch(move) {
                         default: 
-                        tempMatrix = this.matrix;                     
+                            tempMatrix = this.matrix;                  
                         case "right" :
                             tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn + 1);
                             possibleMove.push(this.createMove(
@@ -144,6 +143,7 @@ class Pathfinder{
                             break;
                         case "up" :
                             tempMatrix = tempMatrix.setEmptyPosition(this.matrix.emptyRow - 1, this.matrix.emptyColumn);
+                            console.log(tempMatrix.matrix.join('\r\n'));
                             possibleMove.push(this.createMove(
                                 "UP",
                                 this.matrix,
@@ -164,9 +164,10 @@ class Pathfinder{
                 }
             }
             possibleMove.sort((_a, _b) => parseFloat(_a.score) - parseFloat(_b.score));
-            for(let k in possibleMove) {
+            /*for(let k in possibleMove) {
                 console.log(possibleMove[k].postMat);
-            }
+            }*/
+            console.log(" aa"  + possibleMove[0].postMat.matrix.join('\r\n'));
             this.matrix = possibleMove[0].postMat;
             this.currentRow = this.matrix.getBoxPos(this.boxID)[0];
             this.currentColumn = this.matrix.getBoxPos(this.boxID)[1];
