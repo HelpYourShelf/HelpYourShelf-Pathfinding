@@ -1,5 +1,4 @@
 import cloneDeep from 'lodash.clonedeep';
-
 /**
 * 
 * @param {number} rows The number of rows you want in your matrix, it (obviously) needs to be greater than 0 
@@ -24,7 +23,7 @@ class Matrix {
         this.matrix[emptyRow][emptyColumn] = 0;
         
         //Enabeling logging to the console
-        if (log) {
+        if (log) { 
             console.log("Successfully created a " + this.rows + " * " + this.columns + " Matrix. The empty box is the one at " + this.emptyRow + " " + this.emptyColumn);
             console.log(this.matrix.join('\r\n'));
         }
@@ -43,7 +42,7 @@ class Matrix {
         this.emptyRow = row;
         this.emptyColumn = col;
 
-        //Returns itself for later use
+        //Returns the object
         return this;
     }
 
@@ -117,6 +116,14 @@ class Pathfinder {
             + Math.pow(column - this.destinationColumn, 2))
     }
 
+    emptyScore(tempMatrix) {
+        if(tempMatrix.emptyRow == this.destinationRow && tempMatrix.emptyColumn == this.destinationColumn) {
+            return 0;
+        } else {
+            return this.hscore(tempMatrix.emptyRow, tempMatrix.emptyColumn) / 3 ;
+        }
+    }
+
     /**
      * Creates an object that contains somes properties that a move need
      * @param {String} name Name of the move, not that useful, it just makes it more readeable by humans
@@ -134,7 +141,6 @@ class Pathfinder {
         }
     }
 
-
     /**
      * Solves the problem defined by instanciating the class
      */
@@ -143,6 +149,7 @@ class Pathfinder {
         let gscore = 0;
         let possibleMove = [];
         let moveHistory = [];
+        let bigHisory = [];
         //The cloneDeep function requires the use of Lodash since I didn't know how to do without it
         let tempMatrix = cloneDeep(this.matrix); 
 
@@ -205,10 +212,15 @@ class Pathfinder {
             //Sorting available moves by score (ascending). Lower is better
             possibleMove.sort((_a, _b) => parseFloat(_a.score) - parseFloat(_b.score));
             
+            moveHistory.push(possibleMove[0]);
+            if(possibleMove[0].postMat.emptyRow === moveHistory[gscore-2].postMat.emptyRow && possibleMove[0].postMat.emptyColumn === moveHistory[gscore-2].postMat.emptyColumn) {
+                console.log("infinitu")
+            }
+
             this.matrix = possibleMove[0].postMat;
             this.currentRow = this.matrix.getBoxPos(this.boxID)[0];
             this.currentColumn = this.matrix.getBoxPos(this.boxID)[1];
-            moveHistory.push(possibleMove[0]);
+            bigHisory.push(possibleMove);
 
             if(this.log) {
                 console.log("************ BEST MOVE IS " + possibleMove[0].name + " ************");
