@@ -55,7 +55,7 @@ class Matrix {
             "right": this.matrix[this.emptyRow][this.emptyColumn + 1] ? true : false,
             "left": this.matrix[this.emptyRow][this.emptyColumn - 1] ? true : false,
             "up": this.matrix[this.emptyRow - 1] ? true : false,
-            "down": this.matrix[this.emptyColumn + 1] ? true : false,
+            "down": this.matrix[this.emptyRow + 1] ? true : false,
         }
     }
 
@@ -116,14 +116,6 @@ class Pathfinder {
             + Math.pow(column - this.destinationColumn, 2))
     }
 
-    emptyScore(tempMatrix) {
-        if(tempMatrix.emptyRow == this.destinationRow && tempMatrix.emptyColumn == this.destinationColumn) {
-            return 0;
-        } else {
-            return this.hscore(tempMatrix.emptyRow, tempMatrix.emptyColumn) / 3 ;
-        }
-    }
-
     /**
      * Creates an object that contains somes properties that a move need
      * @param {String} name Name of the move, not that useful, it just makes it more readeable by humans
@@ -132,9 +124,10 @@ class Pathfinder {
      * @param {number} score Estimated distance to objective (see hscore method just above) + gscore (cost to reach this move)
      * @returns {Object} A movement object, required for A*  algorithm
      */
-    createMove(name, preMat, postMat, score) {
+    createMove(name,oppositeName, preMat, postMat, score) {
         return {
             name: name,
+            oppositeName: oppositeName,
             preMat: preMat,
             postMat: postMat,
             score: score,
@@ -149,14 +142,13 @@ class Pathfinder {
         let gscore = 0;
         let possibleMove = [];
         let moveHistory = [];
-        let bigHisory = [];
         //The cloneDeep function requires the use of Lodash since I didn't know how to do without it
         let tempMatrix = cloneDeep(this.matrix); 
 
         //Testing if it has reached the desired position
         while (this.matrix.matrix[this.destinationRow][this.destinationColumn] != this.boxID) { 
-            gscore++;
             possibleMove = [];
+            gscore++;
 
             //Iterating trhough available moves
             for (let move in this.matrix.possibleMoves) {
@@ -170,6 +162,7 @@ class Pathfinder {
                             tempMatrix = cloneDeep(this.matrix);
                             possibleMove.push(this.createMove(
                                 "RIGHT",
+                                "LEFT",
                                 this.matrix,
                                 tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn + 1),
                                 gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
@@ -180,6 +173,7 @@ class Pathfinder {
                             tempMatrix = cloneDeep(this.matrix);
                             possibleMove.push(this.createMove(
                                 "LEFT",
+                                "RIGHT",
                                 this.matrix,
                                 tempMatrix.setEmptyPosition(this.matrix.emptyRow, this.matrix.emptyColumn - 1),
                                 gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
@@ -190,6 +184,7 @@ class Pathfinder {
                             tempMatrix = cloneDeep(this.matrix);
                             possibleMove.push(this.createMove(
                                 "UP",
+                                "DOWN",
                                 this.matrix,
                                 tempMatrix.setEmptyPosition(this.matrix.emptyRow - 1, this.matrix.emptyColumn),
                                 gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
@@ -200,8 +195,9 @@ class Pathfinder {
                             tempMatrix = cloneDeep(this.matrix);
                             possibleMove.push(this.createMove(
                                 "DOWN",
+                                "UP",
                                 this.matrix,
-                                tempMatrix.setEmptyPosition(this.matrix.emptyColumn + 1, this.matrix.emptyColumn),
+                                tempMatrix.setEmptyPosition(this.matrix.emptyRow + 1, this.matrix.emptyColumn),
                                 gscore + this.hscore(tempMatrix.getBoxPos(this.boxID)[0], tempMatrix.getBoxPos(this.boxID)[1])
                             ));
                             break;
@@ -211,17 +207,27 @@ class Pathfinder {
 
             //Sorting available moves by score (ascending). Lower is better
             possibleMove.sort((_a, _b) => parseFloat(_a.score) - parseFloat(_b.score));
+
             
             moveHistory.push(possibleMove[0]);
-            if(possibleMove[0].postMat.emptyRow === moveHistory[gscore-2].postMat.emptyRow && possibleMove[0].postMat.emptyColumn === moveHistory[gscore-2].postMat.emptyColumn) {
-                console.log("infinitu")
-            }
 
-            this.matrix = possibleMove[0].postMat;
+            if(gscore > 1) {
+                if(moveHistory[gscore-1].oppositeName === possibleMove[0].name) {
+                    moveHistory.pop();
+                    moveHistory.push(possibleMove[1]);
+                    this.matrix = possibleMove[1].postMat;
+                }else {
+                    this.matrix = possibleMove[0].postMat;
+                    
+                }
+            } else {
+                moveHistory.push(possibleMove[0]);
+                this.matrix = possibleMove[0].postMat;
+            }
             this.currentRow = this.matrix.getBoxPos(this.boxID)[0];
             this.currentColumn = this.matrix.getBoxPos(this.boxID)[1];
-            bigHisory.push(possibleMove);
 
+            
             if(this.log) {
                 console.log("************ BEST MOVE IS " + possibleMove[0].name + " ************");
                 console.log("It had a score of " + possibleMove[0].score);
@@ -240,4 +246,4 @@ class Pathfinder {
     }
 }
 
-let test = new Pathfinder(new Matrix(3,3,1,0,true), 1, 1 ,1, true);
+let test = new Pathfinder(new Matrix(3,3,1,0,true), 1, 2 ,1, true);
