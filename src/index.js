@@ -242,8 +242,6 @@ class Pathfinder {
             }
         }
         console.log("SUCCESS ! ");
-        return;
+        return moveHistory;
     }
 }
-
-let test = new Pathfinder(new Matrix(3,3,1,0,true), 1, 2 ,1, true);
